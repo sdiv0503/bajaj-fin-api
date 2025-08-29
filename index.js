@@ -1,23 +1,20 @@
-// index.js
-
-// 1. Import Express
 const express = require('express');
-
-// 2. Initialize the Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 3. Middleware to parse JSON bodies
-// This is crucial for reading the 'data' array from the request
 app.use(express.json());
 
-// 4. Define the POST endpoint for /bfhl
 app.post('/bfhl', (req, res) => {
     try {
-        // Extract the 'data' array from the request body
+        if (!req.body || !('data' in req.body)) {
+            return res.status(400).json({
+                is_success: false,
+                error: "Invalid request: The 'data' key is missing from the request body."
+            });
+        }
+
         const { data } = req.body;
 
-        // --- Basic Input Validation ---
         if (!Array.isArray(data)) {
             return res.status(400).json({ 
                 is_success: false, 
@@ -25,12 +22,10 @@ app.post('/bfhl', (req, res) => {
             });
         }
 
-        // --- Personal Information (as per requirements) ---
-        const user_id = "DivyanshSharma"; // Format: full_name_ddmmyyyy
+        const user_id = "divyansh_sharma"; 
         const email = "divyansh.sharma2022b@vitstudent.ac.in";
         const roll_number = "22BIT0080";
 
-        // --- Logic Implementation ---
         const odd_numbers = [];
         const even_numbers = [];
         const alphabets = [];
@@ -38,52 +33,38 @@ app.post('/bfhl', (req, res) => {
         let sum = 0;
         let alphabet_string = "";
 
-        // Iterate over the input data array
         data.forEach(item => {
-            // Check if the item is a number (as a string)
-            if (!isNaN(item) && !/[a-zA-Z]/.test(item)) {
-                const num = parseInt(item, 10);
+            const itemStr = String(item);
+
+            if (/^[a-zA-Z]+$/.test(itemStr)) {
+                alphabets.push(itemStr.toUpperCase());
+                alphabet_string += itemStr;
+            } 
+            else if (/^-?\d+$/.test(itemStr)) {
+                const num = parseInt(itemStr, 10);
                 sum += num;
                 if (num % 2 === 0) {
-                    even_numbers.push(item.toString());
+                    even_numbers.push(itemStr);
                 } else {
-                    odd_numbers.push(item.toString());
+                    odd_numbers.push(itemStr);
                 }
             } 
-            // Check if the item is an alphabet or a string of alphabets
-            else if (/^[a-zA-Z]+$/.test(item)) {
-                alphabets.push(item.toUpperCase());
-                alphabet_string += item;
-            } 
-            // Otherwise, it's a special character
             else {
-                special_characters.push(item);
+                special_characters.push(itemStr);
             }
         });
 
-        // Logic for the concatenated and reversed alternating caps string
         let reversed_alphabets = alphabet_string.split('').reverse().join('');
+        
         let concat_string = "";
         for (let i = 0; i < reversed_alphabets.length; i++) {
-            if (i % 2 !== 0) { // Odd index (second character, fourth, etc.)
+            if (i % 2 === 0) {
                 concat_string += reversed_alphabets[i].toUpperCase();
-            } else { // Even index
-                concat_string += reversed_alphabets[i].toLowerCase();
-            }
-        }
-        // Correction based on example: "ByA" -> first is upper, second lower. Let's adjust.
-        // "ayb" -> "bya" -> B y A. Let's re-implement based on example.
-        concat_string = "";
-         for (let i = 0; i < reversed_alphabets.length; i++) {
-            if (i % 2 === 0) { // Even index (0, 2, 4...)
-                concat_string += reversed_alphabets[i].toUpperCase();
-            } else { // Odd index (1, 3, 5...)
+            } else {
                 concat_string += reversed_alphabets[i].toLowerCase();
             }
         }
 
-
-        // --- Construct the final response object ---
         const response = {
             is_success: true,
             user_id,
@@ -97,20 +78,16 @@ app.post('/bfhl', (req, res) => {
             concat_string
         };
 
-        // Send the successful response
         return res.status(200).json(response);
 
     } catch (error) {
-        // --- Graceful Error Handling ---
-        // If anything goes wrong in the try block, this will catch it
         return res.status(500).json({
             is_success: false,
-            error: error.message
+            error: `An internal server error occurred: ${error.message}`
         });
     }
 });
 
-// 5. Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
