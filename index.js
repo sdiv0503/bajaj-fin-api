@@ -26,9 +26,9 @@ app.post('/bfhl', (req, res) => {
         }
 
         // --- Personal Information (as per requirements) ---
-        const user_id = "yash_raj_21082002"; // Format: full_name_ddmmyyyy
-        const email = "yr0909@srmist.edu.in";
-        const roll_number = "RA2011003010909";
+        const user_id = "DivyanshSharma"; // Format: full_name_ddmmyyyy
+        const email = "divyansh.sharma2022b@vitstudent.ac.in";
+        const roll_number = "22BIT0080";
 
         // --- Logic Implementation ---
         const odd_numbers = [];
